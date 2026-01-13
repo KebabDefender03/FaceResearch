@@ -44,10 +44,14 @@
 
 /* --- Inputs & Buttons --- */
         .upload-area { display: flex; justify-content: space-between; gap: 20px; margin: 30px 0; }
-        .input-group { width: 48%; background: var(--bg-input); padding: 20px; border-radius: 10px; border: 2px dashed #444; text-align: center; }
-        .input-group:hover { border-color: #666; }
-        label { display: block; margin-bottom: 10px; font-weight: bold; }
-        input[type="file"] { width: 90%; color: #aaa; }
+        .input-group { width: 48%; background: var(--bg-input); padding: 20px; border-radius: 10px; border: 2px dashed #444; text-align: center; cursor: pointer; transition: all 0.3s ease; }
+        .input-group:hover { border-color: var(--accent-blue); background: rgba(58, 134, 255, 0.05); }
+        .input-group.dragover { border-color: var(--accent-green); background: rgba(39, 174, 96, 0.1); }
+        label { display: block; margin-bottom: 10px; font-weight: bold; pointer-events: none; }
+        input[type="file"] { display: none; }
+        .upload-placeholder { color: #888; font-size: 0.9em; padding: 20px 0; pointer-events: none; }
+        .upload-placeholder .icon { font-size: 2em; margin-bottom: 10px; }
+        .file-name { color: var(--accent-green); font-weight: bold; margin-top: 10px; word-break: break-all; }
         .preview-img { width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-top: 15px; display: none; border: 1px solid #444; }
 
         /* Actie Knop Basis Stijl */
@@ -138,13 +142,155 @@
             0% { transform: translateY(0) rotate(0deg); opacity: 0.25; }
             100% { transform: translateY(-120vh) rotate(360deg); opacity: 0; }
         }
+
+        /* --- RESPONSIVE DESIGN --- */
+        
+        /* Mobile Menu Toggle */
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            z-index: 1000;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2em;
+        }
+        .menu-toggle-left { left: 15px; }
+        .menu-toggle-right { right: 15px; }
+
+        /* Sidebar overlay - hidden by default */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 99;
+        }
+        .sidebar-overlay.active { display: block; }
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2em;
+        }
+        .menu-toggle-left { left: 15px; }
+        .menu-toggle-right { right: 15px; }
+
+        /* Tablet (max-width: 1024px) */
+        @media (max-width: 1024px) {
+            .sidebar { width: 240px; padding: 15px; }
+            .sidebar-right { width: 260px; }
+            .main-content { padding: 30px 20px; }
+            .container { padding: 30px; }
+            h1 { font-size: 1.5em; }
+            .tab-btn { padding: 8px 20px; font-size: 1em; }
+        }
+
+        /* Mobile (max-width: 768px) */
+        @media (max-width: 768px) {
+            body { 
+                flex-direction: column; 
+                height: auto; 
+                overflow-y: auto; 
+            }
+
+            .menu-toggle { display: block; }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                height: 100vh;
+                width: 280px !important;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                z-index: 100;
+            }
+            .sidebar-left { left: 0; }
+            .sidebar-right { 
+                right: 0; 
+                left: auto;
+                transform: translateX(100%);
+            }
+            .sidebar.open { transform: translateX(0); }
+
+            .main-content { 
+                padding: 70px 15px 30px; 
+                min-height: 100vh;
+            }
+            .container { 
+                padding: 20px; 
+                border-radius: 12px;
+            }
+
+            h1 { font-size: 1.4em; margin-bottom: 10px; }
+            .container > p { font-size: 0.8em !important; margin-bottom: 20px !important; }
+
+            .tabs-container { 
+                flex-direction: column; 
+                gap: 10px; 
+                margin-bottom: 20px;
+            }
+            .tab-btn { 
+                width: 100%; 
+                padding: 12px; 
+                font-size: 1em; 
+            }
+
+            .upload-area { 
+                flex-direction: column; 
+                gap: 15px; 
+                margin: 20px 0;
+            }
+            .input-group { 
+                width: 100%; 
+                padding: 15px;
+            }
+            .preview-img { height: 150px; }
+
+            button.action-btn { 
+                padding: 12px 30px; 
+                font-size: 16px; 
+            }
+
+            #result-box { 
+                padding: 20px; 
+                margin-top: 20px;
+            }
+            #result-box h2 { font-size: 1.3em; }
+        }
+
+        /* Small Mobile (max-width: 480px) */
+        @media (max-width: 480px) {
+            .main-content { padding: 60px 10px 20px; }
+            .container { padding: 15px; }
+            h1 { font-size: 1.2em; }
+            .tab-btn { padding: 10px; font-size: 0.9em; }
+            .input-group { padding: 12px; }
+            .preview-img { height: 120px; }
+            button.action-btn { padding: 10px 20px; font-size: 14px; }
+            .info-title { font-size: 1em; }
+            .info-text { font-size: 0.85em; }
+        }
     </style>
 </head>
 <body>
     
     <div id="background-bubbles"></div>
 
-    <div class="sidebar sidebar-left">
+    <!-- Mobile Menu Toggles -->
+    <button class="menu-toggle menu-toggle-left" onclick="toggleSidebar('left')">📜</button>
+    <button class="menu-toggle menu-toggle-right" onclick="toggleSidebar('right')">🧠</button>
+    <div class="sidebar-overlay" onclick="closeSidebars()"></div>
+
+    <div class="sidebar sidebar-left" id="sidebar-left">
         <h2>📜 History</h2>
         <div id="history-list"></div>
         <div style="margin-top: auto; display: flex; flex-direction: column; gap: 10px;">
@@ -166,14 +312,24 @@
             </div>
 
             <div class="upload-area">
-                <div class="input-group">
-                    <label>📷 Original</label>
+                <div class="input-group" onclick="document.getElementById('file1').click()" ondragover="handleDragOver(event, this)" ondragleave="handleDragLeave(this)" ondrop="handleDrop(event, 'file1', 'preview1', this)">
+                    <label>📷 Original Photo</label>
                     <input type="file" id="file1" accept="image/*" onchange="previewImage(this, 'preview1')">
+                    <div class="upload-placeholder" id="placeholder1">
+                        <div class="icon">📁</div>
+                        <div>Click or drag image here</div>
+                    </div>
+                    <div class="file-name" id="filename1"></div>
                     <img id="preview1" class="preview-img">
                 </div>
-                <div class="input-group">
-                    <label>⚖️ Modified / Heavier</label>
+                <div class="input-group" onclick="document.getElementById('file2').click()" ondragover="handleDragOver(event, this)" ondragleave="handleDragLeave(this)" ondrop="handleDrop(event, 'file2', 'preview2', this)">
+                    <label>📷 Comparison Photo</label>
                     <input type="file" id="file2" accept="image/*" onchange="previewImage(this, 'preview2')">
+                    <div class="upload-placeholder" id="placeholder2">
+                        <div class="icon">📁</div>
+                        <div>Click or drag image here</div>
+                    </div>
+                    <div class="file-name" id="filename2"></div>
                     <img id="preview2" class="preview-img">
                 </div>
             </div>
@@ -191,25 +347,35 @@
         </div>
     </div>
 
-    <div class="sidebar sidebar-right">
+    <div class="sidebar sidebar-right" id="sidebar-right">
         <h2>🧠 Methodology</h2>
 
         <div id="info-facenet" class="info-content active">
             <div class="info-title" style="color: var(--accent-orange);">Model: FaceNet512</div>
-            <div class="info-text">Developed by Google (2015). Uses Euclidean distance embeddings.</div>
-            <div class="info-title">Hypothesis: Weight</div>
-            <div class="info-text">FaceNet relies heavily on overall face shape. We expect this model to <strong>struggle</strong> with weight gain (changes in jawline/cheeks).</div>
-            <div class="info-title">When to use?</div>
-            <div class="info-text">Use as a "Baseline" to demonstrate where older AI technology fails.</div>
+            <div class="info-text">Developed by Google Research in 2015. Creates a 512-dimensional embedding vector for each face using a deep CNN. Compares faces using Euclidean distance in this embedding space.</div>
+            
+            <div class="info-title">Technical Details</div>
+            <div class="info-text">• Architecture: Inception-ResNet-v1<br>• Embedding Size: 512 dimensions<br>• Distance Metric: L2 (Euclidean)<br>• Training: Triplet loss function<br>• Threshold: ~0.4 (lower = stricter)</div>
+            
+            <div class="info-title">Hypothesis: Weight Variance</div>
+            <div class="info-text">FaceNet relies heavily on <strong>holistic facial geometry</strong> including jawline contours and cheek structure. Weight gain alters these soft tissue areas significantly, potentially causing <strong>false negatives</strong> (failing to recognize the same person).</div>
+            
+            <div class="info-title">Expected Behavior</div>
+            <div class="info-text">May struggle with significant weight changes as the embedding captures overall face shape rather than immutable features.</div>
         </div>
 
         <div id="info-arcface" class="info-content">
             <div class="info-title" style="color: var(--accent-blue);">Model: ArcFace</div>
-            <div class="info-text">Developed by InsightFace (2019). Uses "Angular Margin Loss".</div>
-            <div class="info-title">Hypothesis: Weight</div>
-            <div class="info-text">ArcFace ignores "Soft Tissue Noise" (like double chins). We expect this model to <strong>successfully recognize</strong> the person despite weight changes.</div>
-            <div class="info-title">When to use?</div>
-            <div class="info-text">Use to test "State-of-the-Art" robustness.</div>
+            <div class="info-text">State-of-the-art model developed by InsightFace (Imperial College London, 2019). Uses Additive Angular Margin Loss to learn highly discriminative face embeddings with better inter-class separation.</div>
+            
+            <div class="info-title">Technical Details</div>
+            <div class="info-text">• Architecture: ResNet-100 backbone<br>• Embedding Size: 512 dimensions<br>• Distance Metric: Cosine similarity<br>• Training: ArcFace loss (angular margin)<br>• Threshold: ~0.68 (higher = match)</div>
+            
+            <div class="info-title">Hypothesis: Weight Variance</div>
+            <div class="info-text">ArcFace focuses on <strong>angular relationships between facial landmarks</strong> (eyes, nose bridge, bone structure) rather than soft tissue. This makes it more robust to "soft tissue noise" like weight-related changes in cheeks and jawline.</div>
+            
+            <div class="info-title">Expected Behavior</div>
+            <div class="info-text">Should maintain recognition accuracy despite weight changes, as core facial bone structure and eye geometry remain constant.</div>
         </div>
     </div>
 
@@ -278,9 +444,36 @@
 
     function previewImage(input, imgId) {
         const file = input.files[0];
+        const fileNum = imgId === 'preview1' ? '1' : '2';
         if (file) {
             document.getElementById(imgId).src = URL.createObjectURL(file);
             document.getElementById(imgId).style.display = 'block';
+            document.getElementById('placeholder' + fileNum).style.display = 'none';
+            document.getElementById('filename' + fileNum).textContent = file.name;
+        }
+    }
+
+    // Drag and drop handlers
+    function handleDragOver(e, element) {
+        e.preventDefault();
+        e.stopPropagation();
+        element.classList.add('dragover');
+    }
+
+    function handleDragLeave(element) {
+        element.classList.remove('dragover');
+    }
+
+    function handleDrop(e, inputId, previewId, element) {
+        e.preventDefault();
+        e.stopPropagation();
+        element.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0 && files[0].type.startsWith('image/')) {
+            const input = document.getElementById(inputId);
+            input.files = files;
+            previewImage(input, previewId);
         }
     }
 
@@ -355,24 +548,76 @@
 
     function exportToCSV() {
         const history = JSON.parse(localStorage.getItem('faceResearchHistory'));
-        if (!history || history.length === 0) { alert("No data available."); return; }
-        let csvContent = "Time,Model,File_Original,File_Modified,Distance_Score,Result\n";
+        if (!history || history.length === 0) { alert("No data available. Run some comparisons first!"); return; }
+        
+        // Properly escape CSV fields that might contain commas or quotes
+        const escapeCSV = (field) => {
+            if (field === null || field === undefined) return '';
+            const str = String(field);
+            if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+                return '"' + str.replace(/"/g, '""') + '"';
+            }
+            return str;
+        };
+        
+        let csvContent = "Time,Model,File_Original,File_Comparison,Distance_Score,Result\n";
         history.forEach(item => {
-            const resultaatText = item.isMatch ? "MATCH" : "NO MATCH";
-            csvContent += `${item.time},${item.model},${item.name1},${item.name2},${item.distance},${resultaatText}\n`;
+            const resultText = item.isMatch ? "MATCH" : "NO MATCH";
+            csvContent += `${escapeCSV(item.time)},${escapeCSV(item.model)},${escapeCSV(item.name1)},${escapeCSV(item.name2)},${escapeCSV(item.distance)},${escapeCSV(resultText)}\n`;
         });
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        
+        // Add BOM for Excel compatibility
+        const BOM = '\uFEFF';
+        const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
+        const timestamp = new Date().toISOString().slice(0,10);
         link.href = URL.createObjectURL(blob);
-        link.download = "research_data_export.csv";
+        link.download = `face_research_export_${timestamp}.csv`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        URL.revokeObjectURL(link.href); // Clean up
     }
     
     function clearHistory() {
         if(confirm("Are you sure you want to clear the history?")) { localStorage.removeItem('faceResearchHistory'); loadHistory(); }
     }
+
+    // Mobile sidebar toggle functions
+    function toggleSidebar(side) {
+        const leftSidebar = document.getElementById('sidebar-left');
+        const rightSidebar = document.getElementById('sidebar-right');
+        const overlay = document.querySelector('.sidebar-overlay');
+        
+        if (side === 'left') {
+            const isOpen = leftSidebar.classList.contains('open');
+            closeSidebars();
+            if (!isOpen) {
+                leftSidebar.classList.add('open');
+                overlay.classList.add('active');
+            }
+        } else if (side === 'right') {
+            const isOpen = rightSidebar.classList.contains('open');
+            closeSidebars();
+            if (!isOpen) {
+                rightSidebar.classList.add('open');
+                overlay.classList.add('active');
+            }
+        }
+    }
+
+    function closeSidebars() {
+        document.getElementById('sidebar-left').classList.remove('open');
+        document.getElementById('sidebar-right').classList.remove('open');
+        document.querySelector('.sidebar-overlay').classList.remove('active');
+    }
+
+    // Close sidebars when clicking on main content on mobile
+    document.querySelector('.main-content').addEventListener('click', function() {
+        if (window.innerWidth <= 768) {
+            closeSidebars();
+        }
+    });
 </script>
 
 </body>
