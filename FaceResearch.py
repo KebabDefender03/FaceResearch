@@ -1,6 +1,11 @@
 import os
+import warnings
 from flask import Flask, render_template, request, jsonify
 from deepface import DeepFace
+
+# Suppress TensorFlow warnings
+warnings.filterwarnings('ignore')
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 app = Flask(__name__)
 
@@ -10,10 +15,15 @@ if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/health', methods=['GET'])
+def health():
+    return jsonify({'status': 'ok'}), 200
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
