@@ -195,6 +195,36 @@ def analyze():
             embedding1_viz = [round(embedding1[i], 4) for i in range(0, 512, 8)]
             embedding2_viz = [round(embedding2[i], 4) for i in range(0, 512, 8)]
         
+        # Calculate cosine distance manually to show the math
+        math_details = None
+        if embedding1 and embedding2:
+            import math
+            # Convert to numpy for easier calculation
+            e1 = np.array(embedding1)
+            e2 = np.array(embedding2)
+            
+            # Dot product: sum of element-wise multiplication
+            dot_product = float(np.dot(e1, e2))
+            
+            # Magnitudes (L2 norms): sqrt of sum of squares
+            magnitude1 = float(np.linalg.norm(e1))
+            magnitude2 = float(np.linalg.norm(e2))
+            
+            # Cosine similarity = dot_product / (magnitude1 * magnitude2)
+            cosine_similarity = dot_product / (magnitude1 * magnitude2)
+            
+            # Cosine distance = 1 - cosine_similarity
+            cosine_distance = 1 - cosine_similarity
+            
+            math_details = {
+                'dot_product': round(dot_product, 6),
+                'magnitude1': round(magnitude1, 6),
+                'magnitude2': round(magnitude2, 6),
+                'cosine_similarity': round(cosine_similarity, 6),
+                'cosine_distance': round(cosine_distance, 6),
+                'embedding_size': len(embedding1)
+            }
+        
         # 2. RUN DEEPFACE WITH THE SELECTED MODEL
         result = DeepFace.verify(
             img1_path=path1, 
@@ -212,7 +242,8 @@ def analyze():
             'face1': face1_data,
             'face2': face2_data,
             'embedding1': embedding1_viz,
-            'embedding2': embedding2_viz
+            'embedding2': embedding2_viz,
+            'math': math_details
         })
 
     except Exception as e:

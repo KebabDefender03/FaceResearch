@@ -204,6 +204,59 @@
         .landmark-legend .dot.nose { background: #ff6b6b; }
         .landmark-legend .dot.mouth { background: #4ecdc4; }
 
+        /* Math Calculation Display */
+        .math-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+        }
+        .math-section h4 {
+            margin: 0 0 12px;
+            color: #888;
+            font-family: inherit;
+            font-weight: normal;
+            text-align: center;
+        }
+        .math-formula {
+            background: rgba(255,255,255,0.05);
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin: 8px 0;
+            border-left: 3px solid var(--accent-blue);
+        }
+        .math-formula.result {
+            border-left-color: #00b894;
+            background: rgba(0, 184, 148, 0.1);
+        }
+        .math-formula.result.no-match {
+            border-left-color: #ff7675;
+            background: rgba(255, 118, 117, 0.1);
+        }
+        .math-label {
+            color: #888;
+            font-size: 0.9em;
+            margin-bottom: 4px;
+        }
+        .math-value {
+            color: #fff;
+            font-size: 1em;
+        }
+        .math-value .highlight {
+            color: var(--accent-blue);
+            font-weight: bold;
+        }
+        .math-value .result-highlight {
+            color: #00b894;
+            font-weight: bold;
+        }
+        .math-value .result-highlight.no-match {
+            color: #ff7675;
+        }
+
         /* History & Info */
         .history-item { background: #2b2b2b; margin-bottom: 10px; padding: 12px; border-radius: 6px; font-size: 0.9em; border-left: 4px solid #555; }
         .history-names { font-weight: bold; color: white; }
@@ -519,6 +572,40 @@
                     <span class="process-step active">2. Align</span>
                     <span class="process-step active">3. Embed (512D)</span>
                     <span class="process-step active">4. Compare</span>
+                </div>
+                
+                <!-- Mathematical Calculation -->
+                <div class="math-section" id="math-section" style="display: none;">
+                    <h4>📐 Cosine Distance Calculation</h4>
+                    
+                    <div class="math-formula">
+                        <div class="math-label">Step 1: Dot Product (A · B)</div>
+                        <div class="math-value">Σ(A<sub>i</sub> × B<sub>i</sub>) = <span class="highlight" id="math-dot"></span></div>
+                    </div>
+                    
+                    <div class="math-formula">
+                        <div class="math-label">Step 2: Magnitude of Embedding A (||A||)</div>
+                        <div class="math-value">√Σ(A<sub>i</sub>²) = <span class="highlight" id="math-mag1"></span></div>
+                    </div>
+                    
+                    <div class="math-formula">
+                        <div class="math-label">Step 3: Magnitude of Embedding B (||B||)</div>
+                        <div class="math-value">√Σ(B<sub>i</sub>²) = <span class="highlight" id="math-mag2"></span></div>
+                    </div>
+                    
+                    <div class="math-formula">
+                        <div class="math-label">Step 4: Cosine Similarity</div>
+                        <div class="math-value">(A · B) / (||A|| × ||B||) = <span id="math-dot2"></span> / (<span id="math-mag1b"></span> × <span id="math-mag2b"></span>) = <span class="highlight" id="math-sim"></span></div>
+                    </div>
+                    
+                    <div class="math-formula result" id="math-result-box">
+                        <div class="math-label">Step 5: Cosine Distance</div>
+                        <div class="math-value">1 - <span id="math-sim2"></span> = <span class="result-highlight" id="math-dist"></span></div>
+                    </div>
+                    
+                    <p style="text-align: center; color: #666; font-size: 0.8em; margin-top: 12px;">
+                        Based on <span id="math-dims">512</span>-dimensional embedding vectors
+                    </p>
                 </div>
                 
                 <p style="font-size: 1.4em; color: #fff; margin: 20px 0 10px;">Similarity: <strong id="similarity-pct" style="font-size: 1.2em;"></strong></p>
@@ -841,6 +928,35 @@
             // Calculate similarity percentage from cosine distance
             const similarityPct = ((1 - data.distance) * 100).toFixed(2);
             document.getElementById('similarity-pct').innerText = similarityPct + '%';
+            
+            // Display mathematical calculation
+            const mathSection = document.getElementById('math-section');
+            if (data.math) {
+                mathSection.style.display = 'block';
+                document.getElementById('math-dot').innerText = data.math.dot_product;
+                document.getElementById('math-dot2').innerText = data.math.dot_product;
+                document.getElementById('math-mag1').innerText = data.math.magnitude1;
+                document.getElementById('math-mag1b').innerText = data.math.magnitude1;
+                document.getElementById('math-mag2').innerText = data.math.magnitude2;
+                document.getElementById('math-mag2b').innerText = data.math.magnitude2;
+                document.getElementById('math-sim').innerText = data.math.cosine_similarity;
+                document.getElementById('math-sim2').innerText = data.math.cosine_similarity;
+                document.getElementById('math-dist').innerText = data.math.cosine_distance;
+                document.getElementById('math-dims').innerText = data.math.embedding_size;
+                
+                // Color the result based on match
+                const resultBox = document.getElementById('math-result-box');
+                const distHighlight = document.getElementById('math-dist');
+                if (isMatch) {
+                    resultBox.className = 'math-formula result';
+                    distHighlight.className = 'result-highlight';
+                } else {
+                    resultBox.className = 'math-formula result no-match';
+                    distHighlight.className = 'result-highlight no-match';
+                }
+            } else {
+                mathSection.style.display = 'none';
+            }
             
             document.getElementById('score').innerText = data.distance;
             document.getElementById('thresh').innerText = data.threshold;
