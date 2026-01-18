@@ -112,6 +112,98 @@
         .match-box { background-color: rgba(0, 184, 148, 0.15); border: 2px solid #00b894; color: #55efc4; }
         .no-match-box { background-color: rgba(214, 48, 49, 0.15); border: 2px solid #ff7675; color: #ff7675; }
 
+        /* Face Comparison Visualization */
+        .face-comparison {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .face-box {
+            text-align: center;
+            position: relative;
+            display: inline-block;
+        }
+        .face-box-inner {
+            position: relative;
+            width: 160px;
+            height: 160px;
+        }
+        .face-box img {
+            width: 160px;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 3px solid #444;
+            display: block;
+        }
+        .face-box p {
+            margin: 8px 0 0;
+            font-size: 0.8em;
+            color: #888;
+        }
+        .face-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 160px;
+            height: 160px;
+            pointer-events: none;
+            border-radius: 7px;
+        }
+        .comparison-arrow {
+            font-size: 2em;
+            color: #666;
+        }
+        .comparison-arrow.match { color: #00b894; }
+        .comparison-arrow.no-match { color: #ff7675; }
+        
+        .process-steps {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        .process-step {
+            background: rgba(255,255,255,0.05);
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            color: #888;
+        }
+        .process-step.active {
+            background: rgba(58, 134, 255, 0.2);
+            color: var(--accent-blue);
+        }
+
+        /* Landmark Legend */
+        .landmark-legend {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 15px 0 5px;
+            flex-wrap: wrap;
+            font-size: 0.75em;
+            color: #888;
+        }
+        .landmark-legend span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .landmark-legend .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .landmark-legend .dot.eye { background: #00ff88; }
+        .landmark-legend .dot.nose { background: #ff6b6b; }
+        .landmark-legend .dot.mouth { background: #4ecdc4; }
+
         /* History & Info */
         .history-item { background: #2b2b2b; margin-bottom: 10px; padding: 12px; border-radius: 6px; font-size: 0.9em; border-left: 4px solid #555; }
         .history-names { font-weight: bold; color: white; }
@@ -267,6 +359,14 @@
             #result-box h2 { font-size: 1.2em; }
             #similarity-pct { font-size: 1.1em !important; }
             
+            /* Face comparison mobile */
+            .face-comparison { gap: 15px; }
+            .face-box img { width: 90px; height: 90px; }
+            .face-box p { font-size: 0.7em; }
+            .comparison-arrow { font-size: 1.5em; }
+            .process-steps { gap: 5px; }
+            .process-step { padding: 5px 8px; font-size: 0.65em; }
+            
             /* Sidebar content adjustments */
             .sidebar h2 { font-size: 1em; padding-bottom: 12px; }
             .info-title { font-size: 0.95em; }
@@ -386,7 +486,42 @@
 
             <div id="result-box">
                 <h2 id="status-text" style="margin-top:0;"></h2>
-                <p style="font-size: 1.4em; color: #fff; margin: 15px 0;">Similarity: <strong id="similarity-pct" style="font-size: 1.2em;"></strong></p>
+                
+                <!-- Face Comparison Visualization -->
+                <div class="face-comparison" id="face-comparison">
+                    <div class="face-box">
+                        <div class="face-box-inner">
+                            <img id="aligned-face1" src="" alt="Aligned Face 1">
+                            <canvas id="face-canvas1" class="face-canvas" width="160" height="160"></canvas>
+                        </div>
+                        <p>Detected Face 1</p>
+                    </div>
+                    <div class="comparison-arrow" id="comparison-arrow">↔</div>
+                    <div class="face-box">
+                        <div class="face-box-inner">
+                            <img id="aligned-face2" src="" alt="Aligned Face 2">
+                            <canvas id="face-canvas2" class="face-canvas" width="160" height="160"></canvas>
+                        </div>
+                        <p>Detected Face 2</p>
+                    </div>
+                </div>
+                
+                <!-- Landmark Legend -->
+                <div class="landmark-legend">
+                    <span><span class="dot eye"></span> Eyes</span>
+                    <span><span class="dot nose"></span> Nose</span>
+                    <span><span class="dot mouth"></span> Mouth</span>
+                    <span style="color: #666;">Lines = Facial geometry</span>
+                </div>
+                
+                <div class="process-steps">
+                    <span class="process-step active">1. Detect</span>
+                    <span class="process-step active">2. Align</span>
+                    <span class="process-step active">3. Embed (512D)</span>
+                    <span class="process-step active">4. Compare</span>
+                </div>
+                
+                <p style="font-size: 1.4em; color: #fff; margin: 20px 0 10px;">Similarity: <strong id="similarity-pct" style="font-size: 1.2em;"></strong></p>
                 <p style="color: #aaa; font-size: 0.9em;">Distance: <span id="score"></span> (Threshold: <span id="thresh"></span>)</p>
                 <p style="font-size:0.85em; color:#666;">Model: <span id="res-model"></span></p>
             </div>
@@ -431,7 +566,7 @@
     document.addEventListener("DOMContentLoaded", () => {
         loadHistory();
         for(let i=0; i<20; i++) { spawnInstantBubble(); }
-        setInterval(createBubble, 800); 
+        setInterval(createBubble, 800);
     });
 
     function spawnInstantBubble() { createBubble(true); }
@@ -466,6 +601,121 @@
 
         bubbleContainer.appendChild(bubble);
         setTimeout(() => { bubble.remove(); }, duration * 1000 + 3000);
+    }
+
+    function drawLandmarks(canvasId, landmarks, isMatch) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas || !landmarks) return;
+        
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+        
+        // Clear canvas
+        ctx.clearRect(0, 0, width, height);
+        
+        // Landmarks are already scaled to 160x160 by the backend
+        const points = {
+            leftEye: landmarks.left_eye ? { x: landmarks.left_eye.x, y: landmarks.left_eye.y } : null,
+            rightEye: landmarks.right_eye ? { x: landmarks.right_eye.x, y: landmarks.right_eye.y } : null,
+            nose: landmarks.nose ? { x: landmarks.nose.x, y: landmarks.nose.y } : null,
+            mouthLeft: landmarks.mouth_left ? { x: landmarks.mouth_left.x, y: landmarks.mouth_left.y } : null,
+            mouthRight: landmarks.mouth_right ? { x: landmarks.mouth_right.x, y: landmarks.mouth_right.y } : null
+        };
+        
+        console.log('Drawing landmarks:', points);  // Debug
+        
+        // Line color based on match status
+        const lineColor = isMatch ? 'rgba(0, 255, 136, 0.6)' : 'rgba(255, 107, 107, 0.6)';
+        
+        // Draw connecting lines (facial geometry)
+        ctx.strokeStyle = lineColor;
+        ctx.lineWidth = 2;
+        ctx.setLineDash([]);
+        
+        // Eye line
+        if (points.leftEye && points.rightEye) {
+            ctx.beginPath();
+            ctx.moveTo(points.leftEye.x, points.leftEye.y);
+            ctx.lineTo(points.rightEye.x, points.rightEye.y);
+            ctx.stroke();
+        }
+        
+        // Nose to eyes (triangle)
+        if (points.nose) {
+            if (points.leftEye) {
+                ctx.beginPath();
+                ctx.moveTo(points.leftEye.x, points.leftEye.y);
+                ctx.lineTo(points.nose.x, points.nose.y);
+                ctx.stroke();
+            }
+            if (points.rightEye) {
+                ctx.beginPath();
+                ctx.moveTo(points.rightEye.x, points.rightEye.y);
+                ctx.lineTo(points.nose.x, points.nose.y);
+                ctx.stroke();
+            }
+        }
+        
+        // Nose to mouth
+        if (points.nose && points.mouthLeft && points.mouthRight) {
+            const mouthCenter = {
+                x: (points.mouthLeft.x + points.mouthRight.x) / 2,
+                y: (points.mouthLeft.y + points.mouthRight.y) / 2
+            };
+            ctx.beginPath();
+            ctx.moveTo(points.nose.x, points.nose.y);
+            ctx.lineTo(mouthCenter.x, mouthCenter.y);
+            ctx.stroke();
+        }
+        
+        // Mouth line
+        if (points.mouthLeft && points.mouthRight) {
+            ctx.beginPath();
+            ctx.moveTo(points.mouthLeft.x, points.mouthLeft.y);
+            ctx.lineTo(points.mouthRight.x, points.mouthRight.y);
+            ctx.stroke();
+        }
+        
+        // Draw landmark points
+        const dotSize = 5;
+        
+        // Eyes (green)
+        ctx.fillStyle = '#00ff88';
+        if (points.leftEye) {
+            ctx.beginPath();
+            ctx.arc(points.leftEye.x, points.leftEye.y, dotSize, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        if (points.rightEye) {
+            ctx.beginPath();
+            ctx.arc(points.rightEye.x, points.rightEye.y, dotSize, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        // Nose (red/coral)
+        ctx.fillStyle = '#ff6b6b';
+        if (points.nose) {
+            ctx.beginPath();
+            ctx.arc(points.nose.x, points.nose.y, dotSize, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        // Mouth corners (teal)
+        ctx.fillStyle = '#4ecdc4';
+        if (points.mouthLeft) {
+            ctx.beginPath();
+            ctx.arc(points.mouthLeft.x, points.mouthLeft.y, dotSize, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        if (points.mouthRight) {
+            ctx.beginPath();
+            ctx.arc(points.mouthRight.x, points.mouthRight.y, dotSize, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        // Add glow effect to points
+        ctx.shadowBlur = 0;
     }
 
     function switchTab(model) {
@@ -551,6 +801,42 @@
             const isMatch = data.verified;
             resultBox.className = isMatch ? "match-box" : "no-match-box";
             document.getElementById('status-text').innerText = isMatch ? "✅ MATCH" : "❌ NO MATCH";
+            
+            // Display aligned faces if available
+            const faceComparison = document.getElementById('face-comparison');
+            const comparisonArrow = document.getElementById('comparison-arrow');
+            
+            if (data.face1 && data.face2) {
+                document.getElementById('aligned-face1').src = data.face1.image;
+                document.getElementById('aligned-face2').src = data.face2.image;
+                faceComparison.style.display = 'flex';
+                comparisonArrow.className = isMatch ? 'comparison-arrow match' : 'comparison-arrow no-match';
+                comparisonArrow.innerHTML = isMatch ? '≈' : '≠';
+                
+                console.log('Face 1 landmarks:', data.face1.landmarks);
+                console.log('Face 2 landmarks:', data.face2.landmarks);
+                
+                // Draw landmarks on face images after images load
+                const drawAfterLoad = () => {
+                    if (data.face1 && data.face1.landmarks) {
+                        console.log('Drawing landmarks on face 1');
+                        drawLandmarks('face-canvas1', data.face1.landmarks, isMatch);
+                    }
+                    if (data.face2 && data.face2.landmarks) {
+                        console.log('Drawing landmarks on face 2');
+                        drawLandmarks('face-canvas2', data.face2.landmarks, isMatch);
+                    }
+                };
+                
+                document.getElementById('aligned-face1').onload = drawAfterLoad;
+                document.getElementById('aligned-face2').onload = drawAfterLoad;
+                
+                // Also draw after a delay in case images are cached
+                setTimeout(drawAfterLoad, 200);
+                setTimeout(drawAfterLoad, 500);
+            } else {
+                faceComparison.style.display = 'none';
+            }
             
             // Calculate similarity percentage from cosine distance
             const similarityPct = ((1 - data.distance) * 100).toFixed(2);
