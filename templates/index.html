@@ -616,34 +616,104 @@
     </div>
 
     <div class="sidebar sidebar-right" id="sidebar-right">
-        <h2>🧠 Methodology</h2>
+        <h2>🧠 How It Works</h2>
 
         <div id="info-facenet" class="info-content active">
-            <div class="info-title" style="color: var(--accent-orange);">Model: FaceNet512</div>
-            <div class="info-text">Developed by Google Research in 2015. Creates a 512-dimensional embedding vector for each face using a deep CNN trained with triplet loss.</div>
+            <div class="info-title" style="color: var(--accent-orange);">FaceNet512 (Extended)</div>
+            <div class="info-text">
+                An <strong>extended version</strong> of Google's original FaceNet (2015). While the original FaceNet outputs 128 dimensions, 
+                <strong>FaceNet512 outputs 512 dimensions</strong> - allowing it to capture more facial features in its embedding.
+                Trained by David Sandberg on the VGGFace2 dataset, achieving <strong>99.6% accuracy</strong> on the LFW benchmark.
+            </div>
             
-            <div class="info-title">Technical Details</div>
-            <div class="info-text">• Architecture: Inception-ResNet-v1<br>• Embedding Size: 512 dimensions<br>• Distance Metric: Cosine distance<br>• Training: Triplet loss function<br>• Threshold: 0.30 (≥70% similarity = match)</div>
+            <div class="info-title">Architecture</div>
+            <div class="info-text">
+                Built on <strong>Inception-ResNet-V1</strong> backbone - a deep neural network that combines Inception modules 
+                (parallel filters of different sizes) with residual connections (skip connections that help train deeper networks).
+                The 512-dimensional output provides 4× more capacity than the original 128D for encoding facial features.
+            </div>
             
-            <div class="info-title">Hypothesis: Weight Variance</div>
-            <div class="info-text">FaceNet relies heavily on <strong>holistic facial geometry</strong> including jawline contours and cheek structure. Weight gain alters these soft tissue areas significantly, potentially causing <strong>false negatives</strong> (failing to recognize the same person).</div>
+            <div class="info-title">How It Learns</div>
+            <div class="info-text">
+                Uses <strong>triplet loss</strong>: trains on 3 faces at once (anchor, positive, negative). 
+                The network learns to minimize distance between anchor-positive pairs while maximizing distance to negatives.
+                Formula: Loss = max(0, d(anchor,positive) - d(anchor,negative) + margin)
+            </div>
             
-            <div class="info-title">Expected Behavior</div>
-            <div class="info-text">May struggle with significant weight changes as the embedding captures overall face shape rather than immutable features.</div>
+            <div class="info-title">Technical Specs</div>
+            <div class="info-text">
+                • Input: 160×160 pixel RGB face<br>
+                • Output: 512-dimensional embedding<br>
+                • Comparison: Cosine distance<br>
+                • Match threshold: ≤ 0.30<br>
+                • L2 normalized on 512-D hypersphere<br>
+                • (Original FaceNet: 128D, threshold 0.40)
+            </div>
+            
+            <div class="info-title">Weight Change Hypothesis</div>
+            <div class="info-text">
+                FaceNet512 captures <strong>holistic face shape</strong> and texture patterns. 
+                Weight changes alter cheeks, jawline, chin, and facial contours - features that heavily influence the embedding.
+                The 512D space might encode these shape features more prominently, potentially causing 
+                <strong>more false negatives</strong> when appearance changes significantly.
+            </div>
         </div>
 
         <div id="info-arcface" class="info-content">
-            <div class="info-title" style="color: var(--accent-blue);">Model: ArcFace</div>
-            <div class="info-text">State-of-the-art model developed by InsightFace (Imperial College London, 2019). Uses Additive Angular Margin Loss to learn highly discriminative face embeddings with better inter-class separation.</div>
+            <div class="info-title" style="color: var(--accent-blue);">ArcFace (Additive Angular Margin)</div>
+            <div class="info-text">
+                Developed by <strong>InsightFace / Imperial College London</strong> (2018). 
+                State-of-the-art face recognition achieving <strong>99.83% accuracy</strong> on LFW.
+                Published in CVPR 2019 as "ArcFace: Additive Angular Margin Loss for Deep Face Recognition".
+            </div>
             
-            <div class="info-title">Technical Details</div>
-            <div class="info-text">• Architecture: ResNet-100 backbone<br>• Embedding Size: 512 dimensions<br>• Distance Metric: Cosine distance<br>• Training: ArcFace loss (angular margin)<br>• Threshold: 0.68 (≥32% similarity = match)</div>
+            <div class="info-title">Architecture</div>
+            <div class="info-text">
+                Uses <strong>ResNet-100</strong> backbone - a very deep residual network with 100 layers.
+                Trained on the MS1MV2 dataset (5.8M images, 85K identities) - much larger and more diverse than VGGFace2.
+                The angular margin approach creates cleaner decision boundaries between identities.
+            </div>
             
-            <div class="info-title">Hypothesis: Weight Variance</div>
-            <div class="info-text">ArcFace focuses on <strong>angular relationships between facial landmarks</strong> (eyes, nose bridge, bone structure) rather than soft tissue. This makes it more robust to "soft tissue noise" like weight-related changes in cheeks and jawline.</div>
+            <div class="info-title">How It Learns</div>
+            <div class="info-text">
+                Uses <strong>Additive Angular Margin Loss</strong>: maps face embeddings onto a hypersphere and adds an angular penalty.
+                Formula: L = -log(e^(s·cos(θ+m)) / [e^(s·cos(θ+m)) + Σe^(s·cos(θⱼ))])
+                <br>This creates maximum inter-class variance and minimum intra-class variance.
+            </div>
             
-            <div class="info-title">Expected Behavior</div>
-            <div class="info-text">Should maintain recognition accuracy despite weight changes, as core facial bone structure and eye geometry remain constant.</div>
+            <div class="info-title">Technical Specs</div>
+            <div class="info-text">
+                • Input: 112×112 pixel RGB face<br>
+                • Output: 512-dimensional embedding<br>
+                • Comparison: Cosine distance<br>
+                • Match threshold: ≤ 0.68<br>
+                • Angular margin m=0.5, scale s=64<br>
+                • Trained on 5.8M faces, 85K identities
+            </div>
+            
+            <div class="info-title">Weight Change Hypothesis</div>
+            <div class="info-text">
+                ArcFace's angular margin training emphasizes <strong>discriminative features</strong> that separate identities - 
+                focusing more on relative proportions (eye spacing, nose-to-mouth ratio, bone structure).
+                These geometric ratios remain relatively stable during weight changes.
+                The larger training set also provides more variation, potentially making it <strong>more robust to appearance changes</strong>.
+            </div>
+        </div>
+
+        <div class="info-content" style="display: block; margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border-color);">
+            <div class="info-title">📚 Sources</div>
+            <div class="info-text" style="font-size: 0.8em; line-height: 1.6;">
+                <strong>FaceNet:</strong><br>
+                • Schroff et al. "FaceNet: A Unified Embedding for Face Recognition" (CVPR 2015)<br>
+                • <a href="https://arxiv.org/abs/1503.03832" target="_blank" style="color: var(--accent-orange);">arXiv:1503.03832</a><br>
+                • FaceNet512 weights by <a href="https://github.com/davidsandberg/facenet" target="_blank" style="color: var(--accent-orange);">David Sandberg</a><br><br>
+                <strong>ArcFace:</strong><br>
+                • Deng et al. "ArcFace: Additive Angular Margin Loss" (CVPR 2019)<br>
+                • <a href="https://arxiv.org/abs/1801.07698" target="_blank" style="color: var(--accent-blue);">arXiv:1801.07698</a><br>
+                • <a href="https://github.com/deepinsight/insightface" target="_blank" style="color: var(--accent-blue);">InsightFace GitHub</a><br><br>
+                <strong>DeepFace Library:</strong><br>
+                • <a href="https://github.com/serengil/deepface" target="_blank" style="color: var(--accent-green);">github.com/serengil/deepface</a>
+            </div>
         </div>
     </div>
 
